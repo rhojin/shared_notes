@@ -1,0 +1,27 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package de.rhojin.grpc;
+
+service NoteService {
+  rpc GetNotes(Empty) returns (NoteResponse) {}
+  rpc GetNote(NoteId) returns (Note) {}
+  rpc CreateNote(Note) returns (Empty) {}
+  rpc UpdateNote(Note) returns (Empty) {}
+  rpc DeleteNote(NoteId) returns (Note) {}
+}
+
+message Empty {}
+
+message NoteId {
+  int32 id = 1;
+}
+
+message Note {
+  int32 id = 1;
+  int32 index = 2;
+  string text = 3;
+}
+
+message NoteResponse {
+  repeated Note note = 1;
+}
