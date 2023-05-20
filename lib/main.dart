@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:grpc/grpc.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_notes/grpc/Notes.pbgrpc.dart';
@@ -6,6 +7,7 @@ import 'package:shared_notes/grpc/Notes.pbgrpc.dart';
 class NoteServiceClientProvider extends ChangeNotifier {
   NoteServiceClient noteServiceClient;
   List<String> items = []; //TODO: extract to as dedicated ChangeNotifier
+  TextEditingController createNoteTextController = TextEditingController();
 
   NoteServiceClientProvider(this.noteServiceClient);
 
@@ -54,6 +56,13 @@ class App extends StatelessWidget {
                 actions: [
                   Consumer<NoteServiceClientProvider> (
                     builder: (context, notifier, child) {
+                      //https://stackoverflow.com/questions/56275595/no-materiallocalizations-found-myapp-widgets-require-materiallocalizations-to
+                      return CreateButton(notifier);
+                      //needs to be in a separate widget so that MaterialLocalizations widget is in the widget tree of MaterialApp implicitly
+                    }
+                  ),
+                  Consumer<NoteServiceClientProvider> (
+                    builder: (context, notifier, child) {
                       return IconButton(
                           icon: const Icon(
                             Icons.refresh,
@@ -65,11 +74,73 @@ class App extends StatelessWidget {
                   ),
                 ],
             ),
-            body: const Notes()
+            body: const Notes(),
         ),
       )
     );
   }
+}
+
+class CreateButton extends StatelessWidget {
+  final NoteServiceClientProvider notifier;
+  const CreateButton(this.notifier, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: const Icon(
+        Icons.add,
+        color: Colors.white,
+      ),
+      onPressed: () {
+        showDialog(
+            context: context,
+            builder: (context) {
+              return Dialog(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+                elevation: 16,
+                child: Container(
+                  height: 50,
+                  width: 100,
+                  color: Colors.white,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      SizedBox(
+                        height: 40,
+                        width: 200,
+                        child: TextField(
+                          controller: notifier.createNoteTextController,
+                          textAlignVertical: const TextAlignVertical(y: 1),
+                          textAlign: TextAlign.left,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: 'Enter a new note',
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                          onPressed: () {
+                            String text = notifier.createNoteTextController.text;
+                            if(text.isNotEmpty) {
+                              var note = Note(text: text);
+                              notifier.noteServiceClient.createNote(note);
+                              notifier.refresh();
+                            }
+                            Navigator.pop(context);
+                          },
+                          child: const Text("Submit"),
+                      )
+                    ],
+                  ),
+                )
+              );
+            });
+      },
+    );
+  }
+
 }
 
 class Notes extends StatelessWidget {
