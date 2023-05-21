@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:grpc/grpc.dart';
@@ -22,28 +24,35 @@ class NoteServiceClientProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
-
 }
 
 Future<void> main() async {
-  runApp(const App());
+  WidgetsFlutterBinding.ensureInitialized(); //otherwise getConfig() will fail!
+  getConfig().then((config) {
+    runApp(App(config));
+  });
   // await channel.shutdown();
 }
 
+Future<Map<String, dynamic>> getConfig() async {
+  final String response = await rootBundle.loadString('config.json');
+  return jsonDecode(response);
+}
+
 class App extends StatelessWidget {
-  const App({super.key});
+  final Map<String, dynamic> config;
+  const App(this.config, {super.key});
 
   @override
   Widget build(BuildContext context) {
     const title = 'Shared Notes';
 
     final channel = ClientChannel(
-      '10.0.2.2',
-      port: 8080,
+      config['server']['ip'].toString(),
+      port: int.parse(config['server']['port'].toString()),
       options: ChannelOptions(
         credentials: const ChannelCredentials.insecure(),
-        codecRegistry:
-        CodecRegistry(codecs: const [GzipCodec(), IdentityCodec()]),
+        codecRegistry: CodecRegistry(codecs: const [GzipCodec(), IdentityCodec()]),
       ),
     );
     final stub = NoteServiceClient(channel);
