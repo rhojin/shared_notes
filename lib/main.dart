@@ -111,29 +111,32 @@ class CreateButton extends StatelessWidget {
         showDialog(
             context: context,
             builder: (context) {
+              //this is the dialog to add a new entry
               return Dialog(
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
                 elevation: 16,
                 child: Container(
-                  height: 50,
-                  width: 100,
+                  height: 60,
+                  width: 120,
                   color: Colors.white,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      SizedBox(
-                        height: 40,
-                        width: 200,
-                        child: TextField(
-                          controller: notifier.createNoteTextController,
-                          textAlignVertical: const TextAlignVertical(y: 1),
-                          textAlign: TextAlign.left,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Enter a new note',
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.all(3.0),
+                          child: TextField(
+                            controller: notifier.createNoteTextController,
+                            textAlignVertical: const TextAlignVertical(y: 1),
+                            textAlign: TextAlign.left,
+                            decoration: const InputDecoration(
+                              isDense: true,
+                              border: OutlineInputBorder(),
+                              hintText: 'Enter a new note',
+                            ),
                           ),
-                        ),
+                        )
                       ),
                       TextButton(
                           onPressed: () {
@@ -201,27 +204,30 @@ class Notes extends StatelessWidget {
                           showDialog(
                             context: context,
                             builder: (context) {
+                              //this is the dialog to edit one entry
                             return Dialog(
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
                               elevation: 16,
                               child: Container(
-                                height: 50,
-                                width: 100,
+                                height: 60,
+                                width: 120,
                                 color: Colors.white,
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                                   children: [
-                                    SizedBox(
-                                      height: 40,
-                                      width: 200,
-                                      child: TextField(
-                                        controller: notifier.updateNoteTextController,
-                                        textAlignVertical: const TextAlignVertical(y: 1),
-                                        textAlign: TextAlign.left,
-                                        decoration: const InputDecoration(
-                                          border: OutlineInputBorder(),
-                                          hintText: 'Enter note text',
+                                    Expanded(
+                                      child: Container(
+                                        padding: const EdgeInsets.all(3.0),
+                                        child: TextField(
+                                          controller: notifier.updateNoteTextController,
+                                          textAlignVertical: const TextAlignVertical(y: 1),
+                                          textAlign: TextAlign.left,
+                                          decoration: const InputDecoration(
+                                            isDense: true,
+                                            border: OutlineInputBorder(),
+                                            hintText: 'Enter note text',
+                                          ),
                                         ),
                                       ),
                                     ),
