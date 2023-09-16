@@ -18,7 +18,7 @@ class NoteServiceClientProvider extends ChangeNotifier {
     try {
       final response = await noteServiceClient.getNotes(Empty());
       items = response.note;
-      items.sort((a, b) => a.text.compareTo(b.text));
+      items.sort((a, b) => a.text.toLowerCase().compareTo(b.text.toLowerCase()));
     } catch (e) {
       print('Caught error: $e');
     }
