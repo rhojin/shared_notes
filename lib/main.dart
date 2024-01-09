@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_notes/grpc/Notes.pbgrpc.dart';
 
 class TopicServiceClientProvider extends ChangeNotifier {
+  NoteServiceClientProvider? noteServiceClientProvider;
   TopicServiceClient topicServiceClient;
   List<Topic> topics = []; //TODO: extract as dedicated ChangeNotifier?
   Topic? selectedTopic;
@@ -14,6 +15,7 @@ class TopicServiceClientProvider extends ChangeNotifier {
   TextEditingController updateTopicTextController = TextEditingController();
 
   TopicServiceClientProvider(this.topicServiceClient);
+
 
   void refresh() async {
     try {
@@ -33,7 +35,7 @@ class TopicServiceClientProvider extends ChangeNotifier {
   void selectTopic(int topicId) async {
     final newTopic = topics.firstWhere((t) => t.id == topicId);
     selectedTopic = newTopic;
-    notifyListeners();
+    noteServiceClientProvider?.simpleRefresh();
   }
 }
 
@@ -46,9 +48,8 @@ class NoteServiceClientProvider extends ChangeNotifier {
 
   NoteServiceClientProvider(this.topicServiceClientProvider, this.noteServiceClient);
 
-  void refresh() async {
+  void simpleRefresh() async {
     try {
-      topicServiceClientProvider.refresh();
       if (topicServiceClientProvider.selectedTopic != null) {
         final response = await noteServiceClient.getNotesByTopic(topicServiceClientProvider.selectedTopic!);
         items = response.note;
@@ -60,11 +61,12 @@ class NoteServiceClientProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void selectTopic(int topicId) async {
-    topicServiceClientProvider.selectTopic(topicId);
-    refresh();
-    notifyListeners();
+  void refresh() async {
+    topicServiceClientProvider.noteServiceClientProvider ??= this;
+    topicServiceClientProvider.refresh();
+    simpleRefresh();
   }
+
 }
 
 Future<void> main() async {
@@ -188,7 +190,7 @@ class Menu extends StatelessWidget {
                     child: ListTile(
                       title: Text(topic.text),
                       onTap: () {
-                        notifier.selectTopic(topic.id);
+                        notifier.topicServiceClientProvider.selectTopic(topic.id);
                         Navigator.pop(context);
                       },
                       trailing: IconButton(
