@@ -2,8 +2,16 @@ syntax = "proto3";
 option java_multiple_files = true;
 package de.rhojin.grpc;
 
+service TopicService {
+  rpc GetTopics(Empty) returns (Topics) {}
+  rpc CreateTopic(Topic) returns (Empty) {}
+  rpc UpdateTopic(Topic) returns (Empty) {}
+  rpc DeleteTopic(TopicId) returns (Topic) {}
+}
+
 service NoteService {
-  rpc GetNotes(Empty) returns (NoteResponse) {}
+  rpc GetNotesByTopic(Topic) returns (Notes) {}
+  rpc GetNotes(Empty) returns (Notes) {}
   rpc GetNote(NoteId) returns (Note) {}
   rpc CreateNote(Note) returns (Empty) {}
   rpc UpdateNote(Note) returns (Empty) {}
@@ -11,6 +19,19 @@ service NoteService {
 }
 
 message Empty {}
+
+message TopicId {
+  int32 id = 1;
+}
+
+message Topic {
+  int32 id = 1;
+  string text = 2;
+}
+
+message Topics {
+  repeated Topic topic = 1;
+}
 
 message NoteId {
   int32 id = 1;
@@ -20,8 +41,9 @@ message Note {
   int32 id = 1;
   int32 index = 2;
   string text = 3;
+  Topic topic = 4;
 }
 
-message NoteResponse {
+message Notes {
   repeated Note note = 1;
 }
