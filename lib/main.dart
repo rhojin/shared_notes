@@ -19,7 +19,7 @@ class TopicServiceClientProvider extends ChangeNotifier {
 
   void refresh() async {
     try {
-      final response = await topicServiceClient.getTopics(Empty());
+      final response = await topicServiceClient.getAllTopics(Empty());
       topics = response.topic;
       topics.sort((a, b) => a.text.toLowerCase().compareTo(b.text.toLowerCase()));
 
@@ -177,13 +177,38 @@ class Menu extends StatelessWidget {
                 return Dismissible(
                     key: Key(topic.id.toString()),
                     onDismissed: (direction) {
-                      TopicId topicId = TopicId.create()..id = topic.id;
-                      notifier.topicServiceClientProvider.topicServiceClient
-                          .deleteTopic(topicId)
-                          .then((topic) {
-                            notifier.refresh();
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${topic.text} removed')));
-                          });
+                      showDialog(context: context, builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Do you want to delete ${topic.text}?'),
+                          actions: <Widget>[
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                textStyle: Theme.of(context).textTheme.labelLarge,
+                              ),
+                              child: const Text('Yes'),
+                              onPressed: () {
+                                TopicId topicId = TopicId.create()..id = topic.id;
+                                notifier.topicServiceClientProvider.topicServiceClient
+                                    .deleteTopic(topicId)
+                                    .then((topic) {
+                                  notifier.refresh();
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${topic.text} removed')));
+                                });
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                textStyle: Theme.of(context).textTheme.labelLarge,
+                              ),
+                              child: const Text('No'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        );
+                      });
                     },
                     direction: DismissDirection.endToStart,
                     background: Container(color: Colors.red),
